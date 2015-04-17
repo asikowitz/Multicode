@@ -1,2 +1,2 @@
 # Multicode
-A web application that allows for live-updating code and website across multiple computers
+A web application that allows for users to code simultaneously from different computers with a live-updating version of the website.
