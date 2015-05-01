@@ -1,5 +1,5 @@
 console.log("HELLO");
-console.log("hihi");
+console.log("changed3");
 var App = new Marionette.Application();
 
 App.addRegions({
@@ -41,9 +41,8 @@ App.FileView = Marionette.ItemView.extend({
 	    var box = document.getElementById("txt-box");
 	    box.style.display = "none";
 	},	
-	"keypress #txt-box" : function(e){
-	    character = e.key;
-
+//	"keypress #txt-box" : function(e){
+//	    character = e.key;
 //	    if (character == "Backspace"){
 //		this.backspace();
 //	    }else{
@@ -55,7 +54,21 @@ App.FileView = Marionette.ItemView.extend({
 //		}
 //	    this.update(character);
 //	    }
-	    this.update();
+//	    this.update();
+//	},
+	"keypress #txt-box" : function(){
+	    var box = document.getElementById("txt-box");
+	    var stuff = box.value;
+	    console.log(stuff);
+	    this.update(stuff);
+	    
+	    var m = new app.Note({content:note});
+	    m.save(m.toJSON(),{success:function(m,r){
+		if (r.result.n==1){
+		    that.collection.add(m);
+		    that.render();
+		}
+	    }});
 	},
 	"click #delete" : function(){
 	    this.remove();
@@ -70,10 +83,8 @@ App.FileView = Marionette.ItemView.extend({
 	var box = document.getElementById("txt-box");
 	box.style.display = "inline-block";
     },
-    update : function(){
-	var box = document.getElementById("txt-box");
-	console.log(box.innerHTML);
-	this.model.set('content',box.innerHTML);
+    update : function(stuff){
+	this.model.set('content',stuff);
 
 //	before = this.model.attributes.content;
 //	this.model.set('content',before+character);
@@ -89,10 +100,10 @@ App.FileView = Marionette.ItemView.extend({
 	this.edit();
 	//this moves the cursor back to the textarea after updating content
 	var box = document.getElementById("txt-box");
-	box.focus();
-	var v = box.value;
-	box.value = '';
-	box.value = v;
+	//box.focus();
+	//var v = box.value;
+	//box.value = '';
+	//box.value = v;
     },
     modelEvents : {
 	"change" : function() {this.render()}
