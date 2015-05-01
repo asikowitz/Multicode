@@ -1,5 +1,5 @@
 console.log("HELLO");
-
+console.log("hihi");
 var App = new Marionette.Application();
 
 App.addRegions({
@@ -35,17 +35,19 @@ App.FileView = Marionette.ItemView.extend({
 	},	
 	"keypress #txt-box" : function(e){
 	    character = e.key;
-	    if (character == "Backspace"){
-		this.backspace();
-	    }else{
-		if (character == "Enter"){
-		    character = "\n";
-		}
-		if (character == "Tab"){
-		    character = "\t";
-		}
-		this.update(character);
-	    }
+
+//	    if (character == "Backspace"){
+//		this.backspace();
+//	    }else{
+//		if (character == "Enter"){
+//		    character = "\n";
+//		}
+//		if (character == "Tab"){
+//		    character = "\t";
+//		}
+//	    this.update(character);
+//	    }
+	    this.update();
 	},
 	"click #delete" : function(){
 	    this.remove();
@@ -60,10 +62,14 @@ App.FileView = Marionette.ItemView.extend({
 	var box = document.getElementById("txt-box");
 	box.style.display = "inline-block";
     },
-    update : function(character){
-	before = this.model.attributes.content;
-	this.model.set('content',before+character);
+    update : function(){
 	var box = document.getElementById("txt-box");
+	console.log(box.innerHTML);
+	this.model.set('content',box.innerHTML);
+
+//	before = this.model.attributes.content;
+//	this.model.set('content',before+character);
+//	var box = document.getElementById("txt-box");
 	this.cursor();
     },
     backspace : function(){
