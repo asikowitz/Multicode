@@ -53,6 +53,14 @@ App.FileView = Marionette.ItemView.extend({
 	    var stuff = box.value;
 	    console.log(stuff);
 	    this.update(stuff);
+	    
+	    var m = new app.Note({content:note});
+	    m.save(m.toJSON(),{success:function(m,r){
+		if (r.result.n==1){
+		    that.collection.add(m);
+		    that.render();
+		}
+	    }});
 	},
 	"click #delete" : function(){
 	    this.remove();
@@ -84,10 +92,10 @@ App.FileView = Marionette.ItemView.extend({
 	this.edit();
 	//this moves the cursor back to the textarea after updating content
 	var box = document.getElementById("txt-box");
-	box.focus();
-	var v = box.value;
-	box.value = '';
-	box.value = v;
+	//box.focus();
+	//var v = box.value;
+	//box.value = '';
+	//box.value = v;
     },
     modelEvents : {
 	"change" : function() {this.render()}
