@@ -5,6 +5,7 @@ var App = new Marionette.Application();
 App.addRegions({
     firstRegion:"#first-region",
     secondRegion:"#second-region",
+    thirdRegion:"#third-region",
 });
 
 
@@ -16,9 +17,16 @@ App.on("start",function() {
 
     var fileview = new App.FileView({model:text});
     App.firstRegion.show(fileview);
+    
+    var pageview = new App.PageView({model:page});
+    App.thirdRegion.show(pageview);
 
     Backbone.history.start();
 });
+
+App.PageView = Marionette.ItemView.extend({
+    template : "#view-template",
+});    
 
 App.FileView = Marionette.ItemView.extend({
     template : "#edit-template",
@@ -119,7 +127,9 @@ var File = Backbone.Model.extend({});
 var Files = Backbone.Collection.extend({
     model:File
 });
+var Page = Backbone.Model.extend({});
 
+var page = new Page({content:"<!doctype html><html><head></head><body><h1>HI</h1></body></html>"});
 var text = new File({name:"File1", content:"hi"});
 var text2 = new File({name:"File2", content:"hi2"});
 var files = new Files([text, text2]);
