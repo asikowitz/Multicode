@@ -2,31 +2,35 @@
 {% block body %}
 
 <script type="text/template" id="edit-template">
-  <h2><%= name %></h2>
-  <button id="read" disabled>Read</button>
-  <button id="edit">Edit</button><br>
-  <p id="view"><%= content %></p>
-  <textarea style="display:none;" id="txt-box"><%= content %></textarea>
+  <td><h2><%= name %></h2></td>
+  <td><button id="read" disabled>Read</button></td>
+  <td><button id="edit">Edit</button><br></td>
+  <td><p id="view"><%= content %></p>
+  <textarea style="display:none;" id="txt-box"><%= content %></textarea></td>
+</script>
+
+<script type="text/tempale" id="cv-template">
+  <table id="table" class="pure-table pure-table-striped"></table>
 </script>
 
 <script type="text/template" id="view-template">
-  <div id="content"><%= content %></div>
+  <div id="content" height="98%"><%= content %></div>
 </script>
 
 <div class="pure-g">
   <div class="pure-u-1-12"></div>
   <div class="pure-u-5-12">
     <h1>Multicode</h1>
-    <div id="first-region">
+    <div id="main">
       This is the first region
     </div>
-    <hr>
+    <!--hr>
     <h1>All Files</h1>
     <div id="second-region"></div>
   </div>
   <div class="pure-u-1-2">
     <div id="third-region"></div>
-  </div>
+  </div-->
 </div>
 
 <script src="static/app.js"></script>

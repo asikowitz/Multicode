@@ -10,17 +10,18 @@ db = mongo['filesdb']
 def index():
     return render_template("index.html")
 
+#---------------- REST CALLS ----------------------------------------
 
-if __name__ == "__main__":
-   app.debug = True
-   app.run(host="0.0.0.0",port=5678)
-   
-@app.route("/ufile",methods=['GET','POST','DELETE','PUT'])
-@app.route("/ufile/<id>",methods=['GET','POST','DELETE','PUT'])
-def ufile(id=None):
+@app.route("/files")
+def files():
+    files = [x for x in db.files.find()]
+    return json.dumps(files)
+
+@app.route("/file",methods=['GET','POST','DELETE','PUT'])
+@app.route("/file/<id>",methods=['GET','POST','DELETE','PUT'])
+def file(id=None):
     method = request.method
     j = request.get_json();
-    #print method, id, j
 
     if id ==None:
         id =j['content']
@@ -37,4 +38,7 @@ def ufile(id=None):
         x = db.notes.remove({'_id':id})
 
     return json.dumps({'result':x})
->>>>>>> 04430243bc10d410e900452d4206abb82c7ac536
+
+if __name__ == "__main__":
+   app.debug = True
+   app.run(host="0.0.0.0",port=5678)
