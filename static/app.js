@@ -1,5 +1,5 @@
 console.log("HELLO");
-console.log("changed3");
+console.log("changed4");
 var App = new Marionette.Application();
 
 App.addRegions({
@@ -62,7 +62,7 @@ App.FileView = Marionette.ItemView.extend({
 	    console.log(stuff);
 	    this.update(stuff);
 	    
-	    var m = new app.Note({content:note});
+	    var m = new App.Note({content:note});
 	    m.save(m.toJSON(),{success:function(m,r){
 		if (r.result.n==1){
 		    that.collection.add(m);
@@ -100,10 +100,10 @@ App.FileView = Marionette.ItemView.extend({
 	this.edit();
 	//this moves the cursor back to the textarea after updating content
 	var box = document.getElementById("txt-box");
-	//box.focus();
-	//var v = box.value;
-	//box.value = '';
-	//box.value = v;
+	box.focus();
+	var v = box.value;
+	box.value = '';
+	box.value = v;
     },
     modelEvents : {
 	"change" : function() {this.render()}
