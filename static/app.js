@@ -9,9 +9,8 @@ app.addRegions({
 
 app.on("start",function() {
     console.log("Started");
-    app.c = new app.Collection();
-    app.cv = new app.CV({collection:app.c});
-    app.main.show(app.cv);
+    file = new File({name:"Test",content:""});
+    app.main.show(new app.FileView({model:file}));
     
     Backbone.history.start()
 });
@@ -42,26 +41,23 @@ app.Collection = Backbone.Collection.extend({
     }
 });
 
-var Page = Backbone.Model.extend({});
+/*var Page = Backbone.Model.extend({});
 app.PageView = Marionette.ItemView.extend({
     template : "#view-template",
-});
+});*/
 
 app.FileView = Marionette.ItemView.extend({
-    tagName:'tr',
     template : "#edit-template",
     events : {
-	"click #edit" : function(){
-	    console.log("edit mode");
-	    $("#edit").disabled = true;
-	    $("#read").disabled = false;
-	    $("#txt-box").style.display = "hidden";
+	"click #edit" : function() {
+	    $("#edit").prop("disabled",true);
+	    $("#read").prop("disabled",false);
+	    $("#txt-box").css("display","inline-block");
 	},
-	"click #read" : function(){
-	    console.log("read mode");
-	    $("#edit").disabled = false;
-	    $("#read").disabled = true;
-	    $("#txt-box").style.display = "none";
+	"click #read" : function() {
+	    $("#edit").prop("disabled",false);
+	    $("#read").prop("disabled",true);
+	    $("#txt-box").css("display","none");
 	},
 	"keypress #txt-box" : function(){
 	    var stuff = $("txt-box").value;
@@ -70,27 +66,6 @@ app.FileView = Marionette.ItemView.extend({
 	    this.remove();
 	}
     },
-});
-
-app.CV = Marionette.CompositeView.extend({
-    template: "#cv-template",
-    events:{
-	"click #add":function(e) {
-	    that = this;
-	    e.preventDefault();
-	    var note = $("#note").val();
-	    var m = new app.Note({content:note});
-	    m.save(m.toJSON(),{success:function(m,r){
-		if (r.result.n==1){
-		    that.collection.add(m);
-		    that.render();
-		}
-	    }});
-	    console.log(m);
-	}
-    },
-    childViewContainer:"table",
-    childView:app.FileView,
 });
 
 //var page = new Page({content:"<!doctype html><html><head></head><body><h1>HI</h1></body></html>"});
