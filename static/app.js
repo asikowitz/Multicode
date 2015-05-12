@@ -1,3 +1,4 @@
+db.collection.find();
 console.log("HELLO");
 console.log("changed4");
 var App = new Marionette.Application();
@@ -144,4 +145,5 @@ var page = new Page({content:"<!doctype html><html><head></head><body><h1>HI</h1
 var text = new File({name:"File1", content:"hi"});
 var text2 = new File({name:"File2", content:"hi2"});
 var files = new Files([text, text2]);
+var code = 
 App.start();
