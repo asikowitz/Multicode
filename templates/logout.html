@@ -1,0 +1,8 @@
+{% extends "base.html" %}
+{% block body %}
+{% if logged_out %}
+You have logged out.
+{% else %}
+You are not logged in.
+{% endif %}
+{% endblock %}

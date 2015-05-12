@@ -1,13 +1,105 @@
-from flask import Flask, render_template
+from flask import Flask, render_template, request, redirect, session
+from pymongo import MongoClient
+from functools import wraps
+import json
+import db, logindb
 
 app = Flask(__name__)
+mongo = MongoClient()
+db = mongo['filesdb']
 
+def authenticate(func):
+    @wraps(func)
+    def inner():
+        if 'username' in session:
+            return func()
+        else:
+            return redirect('/login')
+    return inner
 
 @app.route("/")
 def index():
-    return render_template("index.html")
+    if request.method=="GET":
+        return render_template("index.html");
+    
+@app.route("/ufile",methods=['GET','POST','DELETE','PUT'])
+@app.route("/ufile/<id>",methods=['GET','POST','DELETE','PUT'])
+def ufile(id=None):
+    method = request.method
+    j = request.get_json();
+    #print method, id, j
 
+    if id ==None:
+        id =j['content']
+        
+    if method == "POST" or method == "PUT":
+        j['_id']=id
+        try:
+            x = db.files.update({'_id':id},j,upsert=True)
+        except:
+            j.pop("_id",None)
+            x = db.files.update({'_id':id},j)
+    
+    if method == "DELETE":
+        x = db.notes.remove({'_id':id})
+
+    return json.dumps({'result':x})
+
+
+@app.route('/register', methods=['GET', 'POST'])
+def register():
+    if request.method == 'GET':
+        return render_template('register.html')
+    button = request.form['button']
+    username = request.form['username']
+    password = request.form['password']
+    first = request.form['first']
+    last = request.form['last']
+    if button == 'cancel':
+        return redirect('/')
+    else:
+        if not password or not first or not last:
+            return render_template('register.html',error='incomplete')
+        criteria = {'username': username}
+        if logindb.find_user(criteria):
+            return render_template('register.html',error='username taken')
+        else:
+            user_params = {'username': username, 'password': password, 'first': first, 'last': last}
+            logindb.new_user(user_params)
+            session['username'] = username
+            return redirect('/')
+
+
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    if request.method == 'GET':
+        return render_template('login.html')
+    button = request.form['button']
+    username = request.form['username']
+    password = request.form['password']
+    valid_user = valid(username, password)
+    if button == 'cancel' or not(valid_user):
+        return redirect('/')
+    else:
+        criteria = {'username': username, 'password': password}
+        user = logindb.find_user(criteria)
+        if user:
+            session['username'] = username
+            return redirect('/')
+        else:
+            return render_template('login.html',error=True)
+
+        
+@app.route('/logout', methods=['GET','POST'])
+@authenticate
+def logout():
+    criteria = {'username': session['username']}
+    session.pop('username', None)
+    return render_template('logout.html',logged_out=True)
 
 if __name__ == "__main__":
-   app.debug = True
-   app.run()
+    app.secret_key = 'Hola'
+    app.debug = True
+    app.run()
+    #app.run(host="0.0.0.0",port=5678)
+        
