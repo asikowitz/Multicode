@@ -1,5 +1,5 @@
 console.log("HELLO");
-console.log("changed11");
+console.log("changed16");
 var App = new Marionette.Application();
 
 App.addRegions({
@@ -59,17 +59,23 @@ App.FileView = Marionette.ItemView.extend({
 	"keypress #txt-box" : function(){
 	    var box = document.getElementById("txt-box");
 	    var stuff = box.value;
+	    this.model.set('content',stuff);
 	    console.log(stuff);
-	    this.update(stuff);
+
+	    //this.update(stuff);
+	    var box = document.getElementById("txt-box");
+	    console.log(this.doGetCaretPosition(box));
+	    caret = this.doGetCaretPosition(box);
+//	    this.setCaretPosition(box,caret);
 	    
-	    var m = new App.Note({content:note});
-	    m.save(m.toJSON(),{success:function(m,r){
-		if (r.result.n==1){
-		    that.collection.add(m);
-		    that.render();
-		}
-	    }});
-	},
+//	    var m = new App.Note({content:note});
+//	    m.save(m.toJSON(),{success:function(m,r){
+//		if (r.result.n==1){
+//		    that.collection.add(m);
+//		    that.render();
+//		}
+//	    }});
+//	},
 	"click #delete" : function(){
 	    this.remove();
 	}
@@ -90,7 +96,7 @@ App.FileView = Marionette.ItemView.extend({
 	caret = doGetCaretPosition(box);
 	this.model.set('content',stuff);
 
-	setCaretPosition(box,caret);
+//	this.setCaretPosition(box,caret);
 
 //	before = this.model.attributes.content;
 //	this.model.set('content',before+character);
@@ -112,6 +118,32 @@ App.FileView = Marionette.ItemView.extend({
 	//box.value = v;
 	
 	setCaretPosition(box,caret+1);
+    },
+    doGetCaretPosition :function(ctrl) {
+	var CaretPos = 0;
+	// IE Support
+	if (document.selection) {	
+	    ctrl.focus ();
+	    var Sel = document.selection.createRange ();	
+	    Sel.moveStart ('character', -ctrl.value.length);	
+	    CaretPos = Sel.text.length;
+	}
+	// Firefox support
+	else if (ctrl.selectionStart || ctrl.selectionStart == '0')
+	    CaretPos = ctrl.selectionStart;    
+	return (CaretPos);    
+    },
+    setCaretPosition : function(ctrl, pos){    
+	if(ctrl.setSelectionRange){
+	    ctrl.focus();
+	    ctrl.setSelectionRange(pos,pos);
+	}else if (ctrl.createTextRange) {
+	    var range = ctrl.createTextRange();
+	    range.collapse(true);
+	    range.moveEnd('character', pos);
+	    range.moveStart('character', pos);
+	    range.select();
+	}
     },
     modelEvents : {
 	"change" : function() {this.render()}
@@ -142,34 +174,6 @@ App.router = new Marionette.AppRouter({
     }
 });
 
-
-function doGetCaretPosition (ctrl) {
-    var CaretPos = 0;
-    // IE Support
-    if (document.selection) {	
-	ctrl.focus ();
-	var Sel = document.selection.createRange ();	
-	Sel.moveStart ('character', -ctrl.value.length);	
-	CaretPos = Sel.text.length;
-    }
-    // Firefox support
-    else if (ctrl.selectionStart || ctrl.selectionStart == '0')
-	CaretPos = ctrl.selectionStart;    
-    return (CaretPos);    
-}
-function setCaretPosition(ctrl, pos)
-{    
-    if(ctrl.setSelectionRange){
-	ctrl.focus();
-	ctrl.setSelectionRange(pos,pos);
-    }else if (ctrl.createTextRange) {
-	var range = ctrl.createTextRange();
-	range.collapse(true);
-	range.moveEnd('character', pos);
-	range.moveStart('character', pos);
-	range.select();
-    }
-}
 
 
 var File = Backbone.Model.extend({});
