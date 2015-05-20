@@ -1,4 +1,4 @@
-from flask import Flask, render_template
+from flask import Flask, render_template, request
 from pymongo import MongoClient
 import json
 
@@ -18,7 +18,6 @@ def files():
     return json.dumps(files)
 
 @app.route("/file",methods=['GET','POST','DELETE','PUT'])
-@app.route("/file/<id>",methods=['GET','POST','DELETE','PUT'])
 def file(id=None):
     method = request.method
     j = request.get_json();

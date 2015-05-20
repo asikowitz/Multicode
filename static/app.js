@@ -1,5 +1,5 @@
 console.log("HELLO");
-console.log("changed3");
+
 var app = new Marionette.Application();
 
 app.addRegions({
@@ -9,13 +9,13 @@ app.addRegions({
 
 app.on("start",function() {
     console.log("Started");
-    file = new File({name:"Test",content:""});
+    file = new app.File({name:"Test",content:"Content"});
     app.main.show(new app.FileView({model:file}));
     
     Backbone.history.start()
 });
 
-var File = Backbone.Model.extend({
+app.File = Backbone.Model.extend({
     urlRoot:'/file',
     idAttribute:'_id',
     id:'_id',
@@ -41,13 +41,14 @@ app.Collection = Backbone.Collection.extend({
     }
 });
 
-/*var Page = Backbone.Model.extend({});
+var Page = Backbone.Model.extend({});
 app.PageView = Marionette.ItemView.extend({
     template : "#view-template",
-});*/
+});
 
 app.FileView = Marionette.ItemView.extend({
     template : "#edit-template",
+    model : app.File,
     events : {
 	"click #edit" : function() {
 	    $("#edit").prop("disabled",true);
@@ -59,8 +60,11 @@ app.FileView = Marionette.ItemView.extend({
 	    $("#read").prop("disabled",true);
 	    $("#txt-box").css("display","none");
 	},
-	"keypress #txt-box" : function(){
-	    var stuff = $("txt-box").value;
+	"keypress #txt-box" : function(e) {
+	    console.log(this.model);
+	    this.model.set({content:$("#txt-box").val()+"k"});
+	    this.model.save(this.model.toJSON(),{success:function(){}});
+	    
 	},
 	"click #delete" : function(){
 	    this.remove();
