@@ -1,189 +1,92 @@
 console.log("HELLO");
-console.log("changed16");
-var App = new Marionette.Application();
 
-App.addRegions({
-    firstRegion:"#first-region",
-    secondRegion:"#second-region",
-    thirdRegion:"#third-region",
+var app = new Marionette.Application();
+
+app.addRegions({
+    main:"#main",
+    first:"#first",
+    second:"#second",
 });
 
 
-App.on("start",function() {
+app.on("start",function() {
     console.log("Started");
-
-    var filesview = new App.FilesView({collection:files});
-    App.secondRegion.show(filesview);
-
-    var fileview = new App.FileView({model:text});
-    App.firstRegion.show(fileview);
-    
-    var pageview = new App.PageView({model:page});
-    App.thirdRegion.show(pageview);
-
-    Backbone.history.start();
+    app.c = new app.Collection();
+    //app.fv = new app.FileView({model:app.c.at(0)});
+    //app.cv = new app.CV(app.c);
+    Backbone.history.start()
 });
 
-App.PageView = Marionette.ItemView.extend({
+app.File = Backbone.Model.extend({
+    urlRoot:'/file',
+    idAttribute:'_id',
+    id:'_id',
+    initialize : function() {
+	console.log(this.id);
+    }
+});
+
+app.Collection = Backbone.Collection.extend({
+    model:app.File,
+    url:'/files',
+    initialize : function() {
+	this.fetch({success:function(d) {
+	    console.log("Fetched");
+	    console.log(d);
+	    app.fv = new app.FileView({model:app.c.at(0)});
+	    page = new app.Page({content:app.fv.model.get("content")});
+	    app.pv = new app.PageView({model:page});
+	    app.main.show(app.fv);
+	    //app.first.show(app.cv);
+	    app.second.show(app.pv);
+	}});
+    }
+});
+
+app.Page = Backbone.Model.extend({});
+app.PageView = Marionette.ItemView.extend({
     template : "#view-template",
-});    
+    model: app.Page,
+});
 
-App.FileView = Marionette.ItemView.extend({
+/*app.FV = Marionette.ItemView.extend({
+    tagName:'li',
+    template:"<%= name %>",
+});
+
+app.CV = Marionette.CollectionView.extend({
+    el:"ul",
+    childView:app.FV,
+});*/
+
+app.FileView = Marionette.ItemView.extend({
     template : "#edit-template",
+    model : app.File,
     events : {
-	"click #edit" : "edit",
-	"click #read" : function(){
-	    console.log("read mode");
-	    editButton = document.getElementById("edit");
-	    editButton.disabled = false;
-	    readButton = document.getElementById("read");
-	    readButton.disabled = true;
-	    var box = document.getElementById("txt-box");
-	    box.style.display = "none";
-	},	
-//	"keypress #txt-box" : function(e){
-//	    character = e.key;
-//	    if (character == "Backspace"){
-//		this.backspace();
-//	    }else{
-//		if (character == "Enter"){
-//		    character = "\n";
-//		}
-//		if (character == "Tab"){
-//		    character = "\t";
-//		}
-//	    this.update(character);
-//	    }
-//	    this.update();
-//	},
-	"keypress #txt-box" : function(){
-	    var box = document.getElementById("txt-box");
-	    var stuff = box.value;
-	    this.model.set('content',stuff);
-	    console.log(stuff);
-
-	    //this.update(stuff);
-	    var box = document.getElementById("txt-box");
-	    console.log(this.doGetCaretPosition(box));
-	    caret = this.doGetCaretPosition(box);
-//	    this.setCaretPosition(box,caret);
-	    
-//	    var m = new App.Note({content:note});
-//	    m.save(m.toJSON(),{success:function(m,r){
-//		if (r.result.n==1){
-//		    that.collection.add(m);
-//		    that.render();
-//		}
-//	    }});
-//	},
-	"click #delete" : function(){
+	"click #edit" : function() {
+	    $("#edit").prop("disabled",true);
+	    $("#read").prop("disabled",false);
+	    $("#txt-box").css("display","inline-block");
+	},
+	"click #read" : function() {
+	    $("#edit").prop("disabled",false);
+	    $("#read").prop("disabled",true);
+	    $("#txt-box").css("display","none");
+	},
+	"keyup #txt-box" : function(e) {
+	    this.model.set({content:$("#txt-box").val()});
+	    this.model.save(this.model.toJSON(),{success:function(){}});
+	    app.pv.model.set({content:$("#txt-box").val()});
+	    app.pv.render();
+	},
+	"click #delete" : function() {
 	    this.remove();
 	}
     },
-    caret : 0,
-    edit : function(){
-	console.log("edit mode");
-	editButton = document.getElementById("edit");
-	editButton.disabled = true;
-	readButton = document.getElementById("read");
-	readButton.disabled = false;
-	var box = document.getElementById("txt-box");
-	box.style.display = "inline-block";
-    },
-    update : function(stuff){
-	var box = document.getElementById("txt-box");
-	console.log(doGetCaretPosition(box));
-	caret = doGetCaretPosition(box);
-	this.model.set('content',stuff);
-
-//	this.setCaretPosition(box,caret);
-
-//	before = this.model.attributes.content;
-//	this.model.set('content',before+character);
-//	var box = document.getElementById("txt-box");
-//	this.cursor();
-    },
-    backspace : function(){
-	before = this.model.attributes.content;
-	this.model.set('content',before.slice(0,before.length-1));
-	this.cursor();
-    },
-    cursor : function(){
-	this.edit();
-	//this moves the cursor back to the textarea after updating content
-	var box = document.getElementById("txt-box");
-	//box.focus();
-	//var v = box.value;
-	//box.value = '';
-	//box.value = v;
-	
-	setCaretPosition(box,caret+1);
-    },
-    doGetCaretPosition :function(ctrl) {
-	var CaretPos = 0;
-	// IE Support
-	if (document.selection) {	
-	    ctrl.focus ();
-	    var Sel = document.selection.createRange ();	
-	    Sel.moveStart ('character', -ctrl.value.length);	
-	    CaretPos = Sel.text.length;
-	}
-	// Firefox support
-	else if (ctrl.selectionStart || ctrl.selectionStart == '0')
-	    CaretPos = ctrl.selectionStart;    
-	return (CaretPos);    
-    },
-    setCaretPosition : function(ctrl, pos){    
-	if(ctrl.setSelectionRange){
-	    ctrl.focus();
-	    ctrl.setSelectionRange(pos,pos);
-	}else if (ctrl.createTextRange) {
-	    var range = ctrl.createTextRange();
-	    range.collapse(true);
-	    range.moveEnd('character', pos);
-	    range.moveStart('character', pos);
-	    range.select();
-	}
-    },
-    modelEvents : {
-	"change" : function() {this.render()}
-    }
 });
 
-App.FilesView = Marionette.CollectionView.extend({
-    childView : App.FileView
-});
-
-var myController = Marionette.Controller.extend({
-    oneRoute : function(){
-	console.log("OneRoute");
-	App.firstRegion.show(new App.FileView({model:text}));
-    },
-    twoRoute : function(){
-	console.log("TwoRoute");
-	App.firstRegion.show(new App.FileView({model:text2}));
-    },
-});
-
-App.controller = new myController();
-App.router = new Marionette.AppRouter({
-    controller: App.controller,
-    appRoutes:{
-	"one":"oneRoute",
-	"two":"twoRoute"
-    }
-});
-
-
-
-var File = Backbone.Model.extend({});
-var Files = Backbone.Collection.extend({
-    model:File
-});
-var Page = Backbone.Model.extend({});
-
-var page = new Page({content:"<!doctype html><html><head></head><body><h1>HI</h1></body></html>"});
-var text = new File({name:"File1", content:"hi"});
-var text2 = new File({name:"File2", content:"hi2"});
-var files = new Files([text, text2]);
-App.start();
+//var page = new Page({content:"<!doctype html><html><head></head><body><h1>HI</h1></body></html>"});
+//var text = new File({name:"File1", content:"hi"});
+//var text2 = new File({name:"File2", content:"hi2"});
+//var files = new Files([text, text2]);
+app.start();
