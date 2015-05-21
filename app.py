@@ -23,8 +23,8 @@ def files():
 def file(id=None):
     method = request.method
     j = request.get_json();
-    #if id ==None:
-    #    id =j['content']
+    if id == None:
+        id =j['content']
 
     if method == "GET":
         try:
@@ -33,7 +33,7 @@ def file(id=None):
             return "Failure"
     
     if method == "POST" or method == "PUT":
-        #j['_id']=id
+        j['_id'] = id
         try:
             x = db.files.update({'name':j['name']},j,upsert=True)
         except:
@@ -47,4 +47,5 @@ def file(id=None):
 
 if __name__ == "__main__":
    app.debug = True
+   print [x for x in db.files.find()]
    app.run(host="0.0.0.0",port=5678)
