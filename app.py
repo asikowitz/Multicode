@@ -108,11 +108,11 @@ def logout():
     session.pop('username', None)
     return render_template('logout.html',logged_out=True)
 
-if __name__ == "__main__":
-    app.secret_key = 'Hola'
-    app.debug = True
-    app.run()
-    #app.run(host="0.0.0.0",port=5678)
+#if __name__ == "__main__":
+#    app.secret_key = 'Hola'
+#   app.debug = True
+#    app.run()
+#    #app.run(host="0.0.0.0",port=5678)
     
 if __name__ == "__main__":
    app.debug = True
