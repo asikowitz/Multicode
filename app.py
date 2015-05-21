@@ -23,6 +23,7 @@ def files():
 def file(id=None):
     method = request.method
     j = request.get_json();
+
     print id
     if id == None:
         id = j['name']
@@ -48,4 +49,5 @@ def file(id=None):
 
 if __name__ == "__main__":
    app.debug = True
+   print [x for x in db.files.find()]
    app.run(host="0.0.0.0",port=5678)
