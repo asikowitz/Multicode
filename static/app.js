@@ -22,7 +22,7 @@ app.File = Backbone.Model.extend({
     idAttribute:'_id',
     id:'_id',
     initialize : function() {
-	console.log(this.id);
+	console.log(this);
     }
 });
 
@@ -30,15 +30,21 @@ app.Collection = Backbone.Collection.extend({
     model:app.File,
     url:'/files',
     initialize : function() {
+	that = this;
 	this.fetch({success:function(d) {
 	    console.log("Fetched");
-	    console.log(d);
-	    app.fv = new app.FileView({model:app.c.at(0)});
-	    page = new app.Page({content:app.fv.model.get("content")});
-	    app.pv = new app.PageView({model:page});
-	    app.main.show(app.fv);
-	    //app.first.show(app.cv);
-	    app.second.show(app.pv);
+	    if (that.length > 0) {
+		app.fv = new app.FileView({model:app.c.at(0)});
+		page = new app.Page({content:app.fv.model.get("content")});
+		app.pv = new app.PageView({model:page});
+		app.main.show(app.fv);
+		//app.first.show(app.cv);
+		app.second.show(app.pv);
+	    }
+	    else {
+		var f = new app.File({name:"test",content:"content"});
+		f.save(f.toJSON(),{success:function(){}});
+	    }
 	}});
     }
 });
@@ -63,7 +69,7 @@ app.FileView = Marionette.ItemView.extend({
     template : "#edit-template",
     model : app.File,
     events : {
-	"click #edit" : function() {
+	/*"click #edit" : function() {
 	    $("#edit").prop("disabled",true);
 	    $("#read").prop("disabled",false);
 	    $("#txt-box").css("display","inline-block");
@@ -72,7 +78,7 @@ app.FileView = Marionette.ItemView.extend({
 	    $("#edit").prop("disabled",false);
 	    $("#read").prop("disabled",true);
 	    $("#txt-box").css("display","none");
-	},
+	},*/
 	"keyup #txt-box" : function(e) {
 	    this.model.set({content:$("#txt-box").val()});
 	    this.model.save(this.model.toJSON(),{success:function(){}});
