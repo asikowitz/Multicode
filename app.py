@@ -35,8 +35,8 @@ def files():
 def file(id=None):
     method = request.method
     j = request.get_json();
-    #if id ==None:
-    #    id =j['content']
+    if id == None:
+        id =j['content']
 
     if method == "GET":
         try:
@@ -45,7 +45,7 @@ def file(id=None):
             return "Failure"
     
     if method == "POST" or method == "PUT":
-        #j['_id']=id
+        j['_id']=id
         try:
             x = db.files.update({'name':j['name']},j,upsert=True)
         except:
@@ -88,8 +88,7 @@ def login():
     button = request.form['button']
     username = request.form['username']
     password = request.form['password']
-    valid_user = valid(username, password)
-    if button == 'cancel' or not(valid_user):
+    if button == 'cancel':
         return redirect('/')
     else:
         criteria = {'username': username, 'password': password}
@@ -107,13 +106,10 @@ def logout():
     criteria = {'username': session['username']}
     session.pop('username', None)
     return render_template('logout.html',logged_out=True)
-
+    
 if __name__ == "__main__":
     app.secret_key = 'Hola'
     app.debug = True
+    print [x for x in db.files.find()]
     app.run()
     #app.run(host="0.0.0.0",port=5678)
-    
-if __name__ == "__main__":
-   app.debug = True
-   app.run(host="0.0.0.0",port=5678)

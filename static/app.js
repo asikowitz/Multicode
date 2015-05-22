@@ -30,15 +30,24 @@ app.Collection = Backbone.Collection.extend({
     model:app.File,
     url:'/files',
     initialize : function() {
+	that = this;
 	this.fetch({success:function(d) {
 	    console.log("Fetched");
-	    console.log(d);
-	    app.fv = new app.FileView({model:app.c.at(0)});
-	    page = new app.Page({content:app.fv.model.get("content")});
-	    app.pv = new app.PageView({model:page});
-	    app.main.show(app.fv);
-	    //app.first.show(app.cv);
-	    app.second.show(app.pv);
+	    console.log(that,that);
+	    if (that.length > 0) {
+		console.log("HERE");
+		app.fv = new app.FileView({model:app.c.at(0)});
+		page = new app.Page({content:app.fv.model.get("content")});
+		app.pv = new app.PageView({model:page});
+		app.main.show(app.fv);
+		//app.first.show(app.cv);
+		app.second.show(app.pv);
+	    }
+	    else {
+		console.log("THERE");
+		var f = new app.File({name:"test",content:"content"});
+		f.save(f.toJSON());
+	    }
 	}});
     }
 });
