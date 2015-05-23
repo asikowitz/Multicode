@@ -5,17 +5,16 @@ var app = new Marionette.Application();
 app.addRegions({
     main:"#main",
     first:"#first",
-    second:"#second",
+    second:"#second"
 });
 
 
 app.on("start",function() {
     console.log("Started");
     app.c = new app.Collection();
-    //app.fv = new app.FileView({model:app.c.at(0)});
-    //app.cv = new app.CV(app.c);
     Backbone.history.start()
 });
+
 
 app.File = Backbone.Model.extend({
     urlRoot:'/file',
@@ -32,21 +31,20 @@ app.Collection = Backbone.Collection.extend({
     initialize : function() {
 	that = this;
 	this.fetch({success:function(d) {
-	    console.log("Fetched");
-	    console.log(that,that);
+		console.log('fetch worked');
+	    console.log(that);
 	    if (that.length > 0) {
-		console.log("HERE");
-		app.fv = new app.FileView({model:app.c.at(0)});
-		page = new app.Page({content:app.fv.model.get("content")});
-		app.pv = new app.PageView({model:page});
-		app.main.show(app.fv);
-		//app.first.show(app.cv);
-		app.second.show(app.pv);
+			console.log("HERE");
+			app.fv = new app.FileView({model:app.c.at(0)});
+			app.main.show(app.fv);
+			
+			page = new app.Page({content:app.fv.model.get("content")});
+			app.pv = new app.PageView({model:page});
+			app.second.show(app.pv);
 	    }
 	    else {
-		console.log("THERE");
-		var f = new app.File({name:"test",content:"content"});
-		f.save(f.toJSON());
+			var f = new app.File({name:"nmnmn",file_names:["fnms", "sds"],content:"content"});
+			f.save(f.toJSON());
 	    }
 	}});
     }
@@ -55,23 +53,16 @@ app.Collection = Backbone.Collection.extend({
 app.Page = Backbone.Model.extend({});
 app.PageView = Marionette.ItemView.extend({
     template : "#view-template",
-    model: app.Page,
+    model: app.Page
 });
-
-/*app.FV = Marionette.ItemView.extend({
-    tagName:'li',
-    template:"<%= name %>",
-});
-
-app.CV = Marionette.CollectionView.extend({
-    el:"ul",
-    childView:app.FV,
-});*/
 
 app.FileView = Marionette.ItemView.extend({
     template : "#edit-template",
     model : app.File,
     events : {
+	//"change #selector": function(){
+	//		console.log('WORKED');
+	//},
 	"click #edit" : function() {
 	    $("#edit").prop("disabled",true);
 	    $("#read").prop("disabled",false);
@@ -91,11 +82,6 @@ app.FileView = Marionette.ItemView.extend({
 	"click #delete" : function() {
 	    this.remove();
 	}
-    },
+    }
 });
-
-//var page = new Page({content:"<!doctype html><html><head></head><body><h1>HI</h1></body></html>"});
-//var text = new File({name:"File1", content:"hi"});
-//var text2 = new File({name:"File2", content:"hi2"});
-//var files = new Files([text, text2]);
 app.start();

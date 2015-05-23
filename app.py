@@ -5,6 +5,8 @@ import json
 import db, logindb
 
 app = Flask(__name__)
+app.config['SECRET_KEY'] = 'Hola'
+app.config['DEBUG'] = True
 mongo = MongoClient()
 db = mongo['filesdb']
 
@@ -23,11 +25,12 @@ def index():
         return render_template("index.html");
     
 #---------------- REST CALLS ----------------------------------------
-
-@app.route("/files")
+print 'start server'
+@app.route("/files",methods=['GET','POST','DELETE','PUT'])
 def files():
     files = [x for x in db.files.find()]
     print files
+    print 'files d'
     return json.dumps(files)
 
 @app.route("/file",methods=['GET','POST','DELETE','PUT'])
@@ -110,6 +113,6 @@ def logout():
 if __name__ == "__main__":
     app.secret_key = 'Hola'
     app.debug = True
-    print [x for x in db.files.find()]
-    app.run()
-    #app.run(host="0.0.0.0",port=5678)
+    #print [x for x in db.files.find()]
+    #app.run()
+    app.run(host="0.0.0.0",port=5678)

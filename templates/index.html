@@ -2,13 +2,20 @@
 {% block body %}
 
 <script type="text/template" id="edit-template">
+  <select id = "selector">
+	  	{% for item in file_names %}
+	 	 	  <option value = "um">{{item}}</option>
+	  	{% endfor %}
+  </select>
+	
   <h2><%= name %></h2>
-  <button id="read">Read</button>
-  <button id="edit">Edit</button><br>
-  <textarea id="txt-box"><%= content %></textarea>
+  <button class="pure-button" id="read">Read</button>
+  <button class="pure-button"id="edit">Edit</button><br>
+  <textarea id="txt-box" rows="30" cols="65"><%= content %></textarea>
 </script>
 <script type="text/template" id="view-template">
   <div id="content" height="98%"><%= content %></div>
+  <h1> DISPLAY </h1>
 </script>
 
 <div class="pure-g">
@@ -21,7 +28,7 @@
     </div>
   </div>
   <div class="pure-u-5-12"><div id="second" style="margin-top: 50px;"></div></div>
-</div>
+  </div>
 
 <script src="static/app.js"></script>
 {% endblock body %}
