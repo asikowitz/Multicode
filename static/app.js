@@ -33,7 +33,6 @@ app.Collection = Backbone.Collection.extend({
 	that = this;
 	this.fetch({success:function(d) {
 	    console.log("Fetched");
-	    console.log(that,that);
 	    if (that.length > 0) {
 		console.log("HERE");
 		app.fv = new app.FileView({model:app.c.at(0)});

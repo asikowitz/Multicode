@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block body %}
+
+<script type="text/template" id="project-template">
+  <h2><%= name %></h2>
+</script>
+
+<div class="container">
+  <button id="new" class="button-big pure-button">New Project</button><br><br>
+  <div id="main">
+  </div>
+</div>
+
+<script src="static/homepage.js"></script>
+{% endblock body %}

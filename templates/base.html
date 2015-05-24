@@ -5,50 +5,55 @@
     <script src="static/lib/lodash.js"></script>
     <script src="static/lib/backbone.js"></script>
     <script src="static/lib/backbone.marionette.js"></script>
-    <link rel="stylesheet" href="http://yui.yahooapis.com/pure/0.5.0/pure-min.css">
+    <link rel="stylesheet" href="static/style.css">
+    <link rel="stylesheet" href="http://yui.yahooapis.com/pure/0.6.0/pure-min.css">
+    
+    <title>Multicode</title>
 
-    <title>Multicode
-    </title>
+    <div id="menu" class="pure-menu pure-menu-horizontal" style="background-color:#191818;padding:10px;">
+      <a class="pure-menu-heading" href="/"><strong style="color:#D8D8D8">MULTICODE</strong></a>
+      <ul class="pure-menu-list" style="float:right">
+	{% if 'username' not in session %}
+	<li class="pure-menu-item"><a class="pure-menu-link" href="/login">Login</a></li>
+	<li class="pure-menu-item end"><a class="pure-menu-link" href="/register">Register</a></li>
+	{% endif %}
+	{% if session['username'] %}
+	<li class="pure-menu-item"><a class="pure-menu-link" href="#" style="margin-right:10px;">{{session['username']}}</a></li>
+	<li class="pure-menu-item end"><a class="pure-menu-link" href="/logout">Logout</a></li>
+	{% endif %}
+      </ul>
+    </div>
+    <br>
     
   </head>
   <body>
-    <div class="pure-g">
-      <div class="pure-u-1-6">
-	<div class="1-box">
-	  <div class="pure-menu pure-menu-open" style="background-color:#D8D8D8">
-	    <a class="pure-menu-heading" href="/">MULTICODE</a>
-	    <ul class="pure-menu-list">
-	      {% if 'username' not in session %}
-	      <li class="pure-menu-item"><a href="/login"><br>Login<br><br></a></li>
-	      <li class="pure-menu-item"><a href="/register"><br>Register<br><br></a></li>
-	      {% endif %}
-	      {% if session['username'] %}
-	      <li class="pure-menu-item"><a href="/logout"><br>Logout<br><br></a></li>
-	      {% endif %}
-	    </ul>
-	  </div>
-	</div>
-      </div>
-      <div class="pure-u-3-4">
-	<div style="width:75%; margin: 0px auto;">
-	  <div class="1-box">
-	    {% block body %}
-	    {% endblock %}
-	  </div>
-	</div>
-      </div>
+    <div id="body">
+    {% block body %}
+    {% endblock %}
+    </div>
 
-      <div class="footer">
-	<div class="legal pure-g">
-	  <div class="pure-u-1 u-sm-1-2">
-	    <p class="legal-license">
-	      <div align="right">
-		Created by . SoftDev period 5
-	      </div>
-	    </p>
-	  </div>
+    <div id="footer" class="footer">
+      <div class="legal pure-g">
+	<div class="pure-u-1 u-sm-1-2">
+	  <p class="legal-license">
+	    <div align="right">
+	      Created by . SoftDev period 5
+	    </div>
+	  </p>
 	</div>
       </div>
+    </div>
+
+    {% with messages = get_flashed_messages() %}
+    {% if messages %}
+    <div id="flash-container">
+      <div id="flash">
+	{% for message in messages %}
+	<p style="margin-left: 20px;"> {{ message }}</p>
+	{% endfor %}
+      </div>
+      {% endif %}
+      {% endwith %}
     </div>
   </body>
 </html>
