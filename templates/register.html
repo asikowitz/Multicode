@@ -1,13 +1,5 @@
 {% extends 'base.html' %}
 {% block body %}
-{% if session['username'] %}
-You are already logged in.
-{% else %}
-{% if error == "username taken" %}
-That username has been taken. Please select another username.
-{% elif error == "incomplete" %}
-Please complete the required fields.
-{% endif %}
 <form method="POST" class="pure-form pure-form-aligned">
   <fieldset>
     <legend>Register for an account</legend>
@@ -33,5 +25,4 @@ Please complete the required fields.
     </div>
   </fieldset>
 </form>
-{% endif %}
 {% endblock %}
