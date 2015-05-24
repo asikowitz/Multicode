@@ -10,20 +10,29 @@ db = mongo['filesdb']
 
 def authenticate(func):
     @wraps(func)
-    def inner():
+    def inner(*args, **kwds):
         if 'username' in session:
-            return func()
+            return func(*args, **kwds)
         else:
+            flash("Please login")
             return redirect('/login')
     return inner
 
 @app.route("/")
 def index():
-    return render_template("homepage.html")
+    if 'username' in session:
+        return render_template("homepage.html", username=session['username'])
+    else:
+        return render_template("index.html")
 
+@app.route("/editor/<project>/")
 @app.route("/editor/<project>/<name>")
+@authenticate
 def editor(project = None, name = None):
-    return render_tempalte("index.html",project=project,name=name)
+    if project == None:
+        flash("You did not select a project")
+        return redirect("/")
+    return render_template("project.html",project=project,name=name,username=session['username'])
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
@@ -76,7 +85,6 @@ def login():
             flash("Invalid username and password combination. Please try again.")
             return render_template('login.html')
 
-        
 @app.route('/logout', methods=['GET','POST'])
 @authenticate
 def logout():
@@ -98,17 +106,19 @@ def files():
 @app.route("/file/<id>",methods=['GET','POST','DELETE','PUT'])
 def file(id=None):
     method = request.method
-    j = request.get_json()
-    if id == None:
-        id =j['name']
-
     if method == "GET":
         try:
-            return db.files.find_one({'name':j['name']})
+            user = request.args.get('user')
+            name = request.args.get('name')
+            return json.dumps({'content':db.files.find_one({'name':name,'user':user})['content']})
         except:
             return "Failure"
-    
-    if method == "POST" or method == "PUT":
+        
+    elif method == "POST" or method == "PUT":
+        j = request.get_json()
+        if id == None:
+            id =j['name']
+
         j['_id']=id
         try:
             x = db.files.update({'name':j['name']},j,upsert=True)
@@ -121,9 +131,9 @@ def file(id=None):
 
     return json.dumps({'result':x})
 
-@app.route("/projects", methods=['GET','POST','DELETE','PUT'])
-def projects(id = None):
-    projects = [x for x in db.projects.find()]
+@app.route("/projects/<user>", methods=['GET','POST','DELETE','PUT'])
+def projects(user = None):
+    projects = [x for x in db.projects.find({'user':user})]
     print "Projects",projects
     return json.dumps(projects)
 
@@ -131,16 +141,17 @@ def projects(id = None):
 @app.route("/project/<id>", methods=['GET','POST','DELETE','PUT'])
 def project(id = None):
     method = request.method
-    j = request.get_json()
-    if id == None:
-        id = j['name']
 
     if method == "GET":
         try:
             return db.projects.find_one({'name':j['name'],'user':j['user']})
         except:
             return "Failure"
-    if method == "POST" or method == "PUT":
+    elif method == "POST" or method == "PUT":
+        j = request.get_json()
+        print j
+        if id == None:
+            id = j['name']
         j['_id']=id
         try:
             j['user'] = session['username']

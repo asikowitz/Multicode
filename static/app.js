@@ -12,6 +12,20 @@ app.addRegions({
 app.on("start",function() {
     console.log("Started");
     app.c = new app.Collection();
+    console.log(filename,username);
+    if (filename != "None" && username != "None" && project != "None") {
+	console.log("FETCHING");
+	app.cur = new app.File({name:filename,user:username,project:project});
+	app.cur.fetch({data:app.cur.toJSON(),processData:true,error:function(d){console.log("ERROR",d)},success:function(d) {
+	    console.log(app.cur.get("content"));
+	}});
+	app.fv = new app.FileView({model:app.cur});
+	page = new app.Page({content:app.fv.model.get("content")});
+	app.pv = new app.PageView({model:page});
+	app.main.show(app.fv);
+	//app.first.show(app.cv);
+	app.second.show(app.pv);
+    }
     //app.fv = new app.FileView({model:app.c.at(0)});
     //app.cv = new app.CV(app.c);
     Backbone.history.start()
@@ -34,17 +48,19 @@ app.Collection = Backbone.Collection.extend({
 	this.fetch({success:function(d) {
 	    console.log("Fetched");
 	    if (that.length > 0) {
-		console.log("HERE");
-		app.fv = new app.FileView({model:app.c.at(0)});
-		page = new app.Page({content:app.fv.model.get("content")});
-		app.pv = new app.PageView({model:page});
-		app.main.show(app.fv);
-		//app.first.show(app.cv);
-		app.second.show(app.pv);
+		console.log("Defaulting to first file");
+		if (filename == "None") {
+		    app.fv = new app.FileView({model:app.c.at(0)});
+		    page = new app.Page({content:app.fv.model.get("content")});
+		    app.pv = new app.PageView({model:page});
+		    app.main.show(app.fv);
+		    //app.first.show(app.cv);
+		    app.second.show(app.pv);
+		}
 	    }
 	    else {
-		console.log("THERE");
-		var f = new app.File({name:"test",content:"content"});
+		console.log("Making first file.");
+		var f = new app.File({name:"First",content:"Start writing here.",project:project,user:username});
 		f.save(f.toJSON());
 	    }
 	}});

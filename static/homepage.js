@@ -8,8 +8,10 @@ app.addRegions({
 
 app.on("start",function() {
     console.log("Started");
-    app.c = new app.Collection();
-    app.main.show(new app.CV({collection:app.c}));
+    if (username != "None") {
+	app.c = new app.Collection([],{user:username});
+	app.main.show(new app.CV({collection:app.c}));
+    }
     Backbone.history.start()
 });
 
@@ -24,9 +26,9 @@ app.Project = Backbone.Model.extend({
 
 app.Collection = Backbone.Collection.extend({
     model:app.Project,
-    url:'/projects',
-    initialize : function() {
-	that = this;
+    url: function() {return "/projects/" + this.user;},
+    initialize: function(models, options) {
+	this.user = options.user;
 	this.fetch({success:function(d) {
 	    console.log("Fetched");
 	}});
@@ -36,20 +38,15 @@ app.Collection = Backbone.Collection.extend({
 app.PV = Marionette.ItemView.extend({
     template : "#project-template",
     model : app.Project,
-    tagName : "li",
-    initialize: function(){ console.log('BookItemView: initialize >>> ' + this.model.get('name')) },
-    onRender: function(){ console.log('BookItemView: onRender >>> ' + this.model.get('name')) },
-    onShow: function(){ console.log('BookItemView: onShow >>> ' + this.model.get('name')) }
+    tagName : "li"
 });
 
 app.CV = Marionette.CollectionView.extend({
     childView : app.PV,
-    tagName : "ul",
-    initialize: function(){ console.log('BookCollectionView: initialize') },
-    onRender: function(){ console.log('BookCollectionView: onRender') },
-    onShow: function(){ console.log('BookCollectionView: onShow') }
+    tagName : "ul"
 });
 
+//New Project Button
 $("#new").click(function() {
     console.log("HI");
     $("#new-container").html('New Project Name: &emsp;\
@@ -58,14 +55,14 @@ $("#new").click(function() {
 </div>');
     
     $("#new-submit").click(function() {
-	console.log("HERE");
+	console.log("HERE",username);
 	var name = $("#new-name").val();
-	var p = new app.Project({"name":name});
+	var p = new app.Project({"name":name,"user":username});
 	p.save(p.toJSON(),{success:function(p,r) {
 	    console.log(r);
 	    if (r.result == "Success") {
 		app.c.add(p);
-		window.location();
+		window.location.assign("/editor/"+p['attributes']['name']);
 	    }
 	    else {
 		console.log('<p style="margin-left: 20px;">'+r.result+'</p>');
