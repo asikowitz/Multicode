@@ -105,6 +105,7 @@ def files():
 @app.route("/file",methods=['GET','POST','DELETE','PUT'])
 @app.route("/file/<id>",methods=['GET','POST','DELETE','PUT'])
 def file(id=None):
+    print 'file method'
     method = request.method
     if method == "GET":
         try:
@@ -140,6 +141,7 @@ def projects(user = None):
 @app.route("/project", methods=['GET','POST','DELETE','PUT'])
 @app.route("/project/<id>", methods=['GET','POST','DELETE','PUT'])
 def project(id = None):
+    print 'project method'
     method = request.method
 
     if method == "GET":

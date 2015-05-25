@@ -96,6 +96,12 @@ app.FileView = Marionette.ItemView.extend({
 	    $("#edit").prop("disabled",false);
 	    $("#read").prop("disabled",true);
 	    $("#txt-box").css("display","none");
+
+		//so that javascript changes are reset in file view.
+	    this.model.set({content:$("#txt-box").val()});
+	    this.model.save(this.model.toJSON(),{success:function(){}});
+	    app.pv.model.set({content:$("#txt-box").val()});
+	    app.pv.render();
 	},
 	"keyup #txt-box" : function(e) {
 	    this.model.set({content:$("#txt-box").val()});
