@@ -71,6 +71,12 @@ app.Page = Backbone.Model.extend({});
 app.PageView = Marionette.ItemView.extend({
     template : "#view-template",
     model: app.Page,
+    modelEvents: {
+	'change': 'fieldsChanged'
+    },
+    fieldsChanged: function(){
+	this.render();
+    }
 });
 
 /*app.FV = Marionette.ItemView.extend({
