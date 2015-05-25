@@ -11,23 +11,28 @@ app.addRegions({
 
 app.on("start",function() {
     console.log("Started");
-    app.c = new app.Collection();
     console.log(filename,username);
+    app.c = new app.Collection({user:username,project:project});
+    console.log("BRO",app.c);
     if (filename != "None" && username != "None" && project != "None") {
 	console.log("FETCHING");
 	app.cur = new app.File({name:filename,user:username,project:project});
-	app.cur.fetch({data:app.cur.toJSON(),processData:true,error:function(d){console.log("ERROR",d)},success:function(d) {
-	    console.log(app.cur.get("content"));
-	}});
-	app.fv = new app.FileView({model:app.cur});
-	page = new app.Page({content:app.fv.model.get("content")});
-	app.pv = new app.PageView({model:page});
-	app.main.show(app.fv);
-	//app.first.show(app.cv);
-	app.second.show(app.pv);
+	app.cur.fetch({data:app.cur.toJSON(),processData:true,
+		       error:function(d) {
+			   console.log("ERROR",d)
+		       },
+		       success:function(d) { //Stuff can only run once fetch has happened
+			   console.log(app.cur);
+			   app.fv = new app.FileView({model:app.cur});
+			   page = new app.Page({content:app.fv.model.get("content")});
+			   app.pv = new app.PageView({model:page});
+			   app.main.show(app.fv);
+			   //app.first.show(app.cv);
+			   app.second.show(app.pv);
+		       }});
     }
-    //app.fv = new app.FileView({model:app.c.at(0)});
-    //app.cv = new app.CV(app.c);
+    //If there is no filename, need to fetch collection
+    //Before getting file
     Backbone.history.start()
 });
 
@@ -45,25 +50,33 @@ app.Collection = Backbone.Collection.extend({
     url:'/files',
     initialize : function() {
 	that = this;
-	this.fetch({success:function(d) {
-	    console.log("Fetched");
-	    if (that.length > 0) {
-		console.log("Defaulting to first file");
-		if (filename == "None") {
-		    app.fv = new app.FileView({model:app.c.at(0)});
-		    page = new app.Page({content:app.fv.model.get("content")});
-		    app.pv = new app.PageView({model:page});
-		    app.main.show(app.fv);
-		    //app.first.show(app.cv);
-		    app.second.show(app.pv);
-		}
-	    }
-	    else {
-		console.log("Making first file.");
-		var f = new app.File({name:"First",content:"Start writing here.",project:project,user:username});
-		f.save(f.toJSON());
-	    }
-	}});
+	console.log("YO",this.toJSON());
+	this.fetch({data:this.toJSON(),processData:true,
+		    error:function(d) {
+			console.log("ERROR",d);
+		    },
+		    success:function(d) {
+			console.log("Fetched",d);
+			if (that.length > 0) {
+			    if (filename == "None") {
+				console.log("Defaulting to first file");
+				app.fv = new app.FileView({model:app.c.at(0)});
+				page = new app.Page({content:app.fv.model.get("content")});
+				app.pv = new app.PageView({model:page});
+				app.main.show(app.fv);
+				//app.first.show(app.cv);
+				app.second.show(app.pv);
+			    }
+			}
+			else {
+			    console.log(filename);
+			    if (filename == "None") {
+				console.log("Making first files.");
+				var f = new app.File({name:"First",content:"Start writing here.",project:project,user:username});
+				f.save(f.toJSON());
+			    }
+			}
+		    }});
     }
 });
 
@@ -74,8 +87,8 @@ app.PageView = Marionette.ItemView.extend({
 });
 
 /*app.FV = Marionette.ItemView.extend({
-    tagName:'li',
-    template:"<%= name %>",
+  tagName:'li',
+  template:"<%= name %>",
 });
 
 app.CV = Marionette.CollectionView.extend({

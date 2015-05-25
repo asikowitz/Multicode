@@ -5,8 +5,11 @@ import json
 import db, logindb
 
 app = Flask(__name__)
+app.secret_key = 'Hola'
+app.debug = True
 mongo = MongoClient()
 db = mongo['filesdb']
+print [x for x in db.files.find()]
 
 def authenticate(func):
     @wraps(func)
@@ -32,7 +35,42 @@ def editor(project = None, name = None):
     if project == None:
         flash("You did not select a project")
         return redirect("/")
+    user = session['username']
+    if db.files.find_one({'user':user,'project':project}) == None:
+        flash("Create your first file")
+        return redirect("/newfile/"+project)
+
     return render_template("project.html",project=project,name=name,username=session['username'])
+
+@authenticate
+@app.route("/newfile/", methods=['GET', 'POST'])
+@app.route("/newfile/<project>", methods=['GET', 'POST'])
+def newfile(project = None):
+    if project == None:
+        flash("Please select a project")
+        return redirect("/")
+    if request.method == "GET":
+        return render_template("newfile.html")
+    if request.method == "POST":
+        button = request.form['button']
+        filename = request.form['filename']
+        user = session['username']
+        
+        if button == 'cancel':
+            if db.files.find_one({'user':user,'project':project}) == None:
+                return redirect("/")
+            else:
+                return redirect("/editor/"+project+"/"+filename)
+
+        if not filename:
+            flash("Please input a new file name")
+            return redirect("")
+        elif db.files.find_one({'user':user,'project':project,'name':filename}) == None:
+            db.files.insert({'_id':filename,'content':"",'name':filename,'project':project,'user':user})
+            return redirect("/editor/"+project+"/"+filename)
+        else:
+            flash("Filename already taken")
+            return redirect("")
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
@@ -98,9 +136,14 @@ def logout():
 
 @app.route("/files")
 def files():
-    files = [x for x in db.files.find()]
-    print files
-    return json.dumps(files)
+    try:
+        user = request.args.get('user')
+        project = request.args.get('project')
+        files = [x for x in db.files.find({'project':project,'user':user})]
+        print "Files",files,user,project
+        return json.dumps(files)
+    except:
+        return "Failure"
 
 @app.route("/file",methods=['GET','POST','DELETE','PUT'])
 @app.route("/file/<id>",methods=['GET','POST','DELETE','PUT'])
@@ -110,7 +153,8 @@ def file(id=None):
         try:
             user = request.args.get('user')
             name = request.args.get('name')
-            return json.dumps({'content':db.files.find_one({'name':name,'user':user})['content']})
+            project = request.args.get('project')
+            return json.dumps({'content':db.files.find_one({'name':name,'user':user,'project':project})['content']})
         except:
             return "Failure"
         
@@ -120,14 +164,14 @@ def file(id=None):
             id =j['name']
 
         j['_id']=id
-        try:
-            x = db.files.update({'name':j['name']},j,upsert=True)
-        except:
-            j.pop("_id",None)
-            x = db.files.update({'name':j['name']},j)
+        #try:
+        x = db.files.update({'name':j['name'],'project':j['project'],'user':j['user']},j,upsert=True)
+        #except:
+        #    j.pop("_id",None)
+        #    x = db.files.update({'name':j['name'],'project':j['project'],'user':j['user']},j)
     
     if method == "DELETE":
-        x = db.files.remove({'name':j['name']})
+        x = db.files.remove({'name':j['name'],'project':j['project'],'user':j['user']})
 
     return json.dumps({'result':x})
 
@@ -177,4 +221,4 @@ if __name__ == "__main__":
     app.debug = True
     print [x for x in db.files.find()]
     #app.run()
-    app.run(host="0.0.0.0",port=5678)
+    #app.run(host="0.0.0.0",port=5678)
