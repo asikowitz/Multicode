@@ -1,3 +1,10 @@
+#editor { 
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+}
 .button-big.pure-button {
     color: white;
     border-radius: 10px;

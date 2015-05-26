@@ -3,10 +3,11 @@
 
 <script type="text/template" id="edit-template">
   <h2><%= name %></h2>
-  <button id="read">Read</button>
-  <button id="edit">Edit</button><br>
-  <textarea id="txt-box"><%= content %></textarea>
+  <!--button id="read">Read</button>
+  <button id="edit">Edit</button><br-->
+  <textarea id="textarea"></textarea>
 </script>
+
 <script type="text/template" id="view-template">
   <div id="content" height="98%"><%= content %></div>
 </script>
@@ -27,6 +28,10 @@
   var filename = '{{ name }}';
   var username = '{{ username }}';
 </script>
+<script src="/static/lib/codemirror.js"></script>
+<script src="/static/mode/xml/xml.js"></script>
+<script src="/static/mode/htmlmixed/htmlmixed.js"></script>
+<!--script src="/static/mode/javascript/javascript.js"></script-->
 <script src="/static/app.js"></script>
 
 {% endblock body %}
