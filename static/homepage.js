@@ -26,7 +26,7 @@ app.Project = Backbone.Model.extend({
 
 app.Collection = Backbone.Collection.extend({
     model:app.Project,
-    url: function() {return "/projects/" + this.user;},
+    url: function() {return "/projects-share/" + this.user;},
     initialize: function(models, options) {
 	this.user = options.user;
 	this.fetch({success:function(d) {
@@ -57,12 +57,12 @@ $("#new").click(function() {
     $("#new-submit").click(function() {
 	console.log("HERE",username);
 	var name = $("#new-name").val();
-	var p = new app.Project({"name":name,"user":username});
+	var p = new app.Project({"name":name,"user":username,"shared":[]});
 	p.save(p.toJSON(),{success:function(p,r) {
 	    console.log(r);
 	    if (r.result == "Success") {
 		app.c.add(p);
-		window.location.assign("/editor/"+p['attributes']['name']);
+		window.location.assign("/editor/"+username+"/"+p['attributes']['name']);
 	    }
 	    else {
 		console.log('<p style="margin-left: 20px;">'+r.result+'</p>');

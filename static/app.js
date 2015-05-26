@@ -30,10 +30,10 @@ app.main.on("show", function() {
 app.on("start",function() {
     console.log("Started");
     console.log(filename,username);
-    app.c = new app.Collection([],{user:username,project:project});
+    app.c = new app.Collection([],{user:p_user,project:project});
     if (filename != "None" && username != "None" && project != "None") {
 	console.log("FETCHING");
-	app.cur = new app.File({name:filename,user:username,project:project});
+	app.cur = new app.File({name:filename,user:p_user,project:project});
 	app.cur.fetch({data:app.cur.toJSON(),processData:true,
 		       error:function(d) {
 			   console.log("ERROR",d)
@@ -65,7 +65,6 @@ app.File = Backbone.Model.extend({
 		//console.log('yt', you_type);
 		if (valid) {
 		    //$("#txt-box").val(that.get("content"));
-		    
 		    if(you_type == false){
 			console.log('cnhg2');
 			var cursor = app.editor.getCursor();
@@ -80,13 +79,13 @@ app.File = Backbone.Model.extend({
 
 app.Collection = Backbone.Collection.extend({
     model:app.File,
-    url:'/files',
+    url:'/files-share',
     initialize : function(models,options) {
 	this.user = options.user;
 	this.project = options.project;
 	this.fetch({data:{'user':this.user,'project':this.project},processData:true,
 		    error:function(d) {
-			console.log("ERROR",d);
+			console.log("ERRORS",d);
 		    },
 		    success:function(d) {
 			console.log("Fetched",d);
@@ -105,7 +104,7 @@ app.Collection = Backbone.Collection.extend({
 				ref_page_var = setInterval(ref_page, 100);
 			    }
 			    else {
-				window.location.assign("/newfile/"+project);
+				//window.location.assign("/newfile/"+project);
 			    }
 			}
 		    }});
@@ -173,8 +172,6 @@ app.FileView = Marionette.ItemView.extend({
     },
 });
 
-//var page = new Page({content:"<!doctype html><html><head></head><body><h1>HI</h1></body></html>"});
-//var text = new File({name:"File1", content:"hi"});
-//var text2 = new File({name:"File2", content:"hi2"});
-//var files = new Files([text, text2]);
+$("#sharing").click(function(){window.location = "/sharing/"+project});
+
 app.start();

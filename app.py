@@ -9,7 +9,7 @@ app.secret_key = 'Hola'
 app.debug = True
 mongo = MongoClient()
 db = mongo['filesdb']
-print [x for x in db.files.find()]
+#print [x for x in db.files.find()]
 
 def authenticate(func):
     @wraps(func)
@@ -28,19 +28,45 @@ def index():
     else:
         return render_template("index.html")
 
-@app.route("/editor/<project>/")
-@app.route("/editor/<project>/<name>")
+@app.route("/sharing/<project>", methods=["GET","POST"])
 @authenticate
-def editor(project = None, name = None):
+def sharing(project = None): #Only creator can change sharing
+    if project == None:
+        flash("You did not select a project for sharing")
+        return redirect("/")
+    if request.method == "GET":
+        user = session['username']
+        users = [x['username'] for x in logindb.find_things({}) if x['username'] != user]
+        shared = [x['shared'] for x in db.projects.find({'name':project,'user':user})][0] #Double list
+        return render_template("sharing.html",project=project,username=user,users=users,shared=shared)
+    elif request.method == "POST":
+        shared = [x for x in request.form if request.form[x] == "on"]
+        button = request.form['button']
+        user = session['username']
+        if button == "cancel":
+            return redirect("/editor/"+user+"/"+project)
+        elif button == "submit":
+            db.projects.update({'name':project,'user':user},{"$set":{'shared':shared}}) #upsert=False
+            return redirect("/editor/"+user+"/"+project)
+        else:
+            return redirect("/") #If someone names username button
+    
+@app.route("/editor/<p_user>/<project>/")
+@app.route("/editor/<p_user>/<project>/<name>")
+@authenticate
+def editor(project = None, name = None, p_user=None):
     if project == None:
         flash("You did not select a project")
         return redirect("/")
+    elif p_user == None:
+        flash("Bad URL")
+        return redirect("/")
     user = session['username']
-    if db.files.find_one({'user':user,'project':project}) == None:
+    if db.files.find_one({'user':p_user,'project':project}) == None:
         flash("Create your first file")
         return redirect("/newfile/"+project)
 
-    return render_template("project.html",project=project,name=name,username=session['username'])
+    return render_template("project.html",project=project,name=name,p_user=p_user,username=session['username'])
 
 @authenticate
 @app.route("/newfile/", methods=['GET', 'POST'])
@@ -66,8 +92,11 @@ def newfile(project = None):
             flash("Please input a new file name")
             return redirect("")
         elif db.files.find_one({'user':user,'project':project,'name':filename}) == None:
-            db.files.insert({'_id':user+'|'+project+'|'+filename,'content':"",'name':filename,'project':project,'user':user})
-            return redirect("/editor/"+project+"/"+filename)
+            project_var = db.projects.find_one({'name':project,'user':user})
+            shared = project_var['shared']
+            p_user = project_var['user']
+            db.files.insert({'_id':p_user+':'+project+':'+filename,'content':"",'shared':shared,'name':filename,'project':project,'user':p_user})
+            return redirect("/editor/"+p_user+"/"+project+"/"+filename)
         else:
             flash("Filename already taken")
             return redirect("")
@@ -130,8 +159,8 @@ def logout():
     session.pop('username', None)
     #return render_template('logout.html',logged_out=True)
     flash("You have been logged out")
-    return render_template("homepage.html")
-    
+    return redirect("/")
+
 #---------------- REST CALLS ----------------------------------------
 
 @app.route("/files")
@@ -140,7 +169,18 @@ def files():
         user = request.args.get('user')
         project = request.args.get('project')
         files = [x for x in db.files.find({'project':project,'user':user})]
-        print "Files",files,user,project
+        return json.dumps(files)
+    except:
+        return "Failure"
+
+@app.route("/files-share")
+def files_share():
+    try:
+        user = request.args.get('user')
+        project = request.args.get('project')
+        files = [x for x in db.files.find({'project':project,'user':user})]
+        print user,project,files
+        files.extend([x for x in db.files.find({}) if user in x['shared']])
         return json.dumps(files)
     except:
         return "Failure"
@@ -161,15 +201,17 @@ def file(id=None):
     elif method == "POST" or method == "PUT":
         j = request.get_json()
         if id == None:
-            id =j['user']+"|"+j['project']+"|"+j['name']
+            id =j['user']+":"+j['project']+":"+j['name']
+        if 'shared' not in j:
+            j['shared'] = []
 
         j['_id']=id
         #try:
-        x = db.files.update({'name':j['name'],'project':j['project'],'user':j['user']},j,upsert=True)
+        x = db.files.update({'name':j['name'],'project':j['project'],'user':j['user']},{"$set":j},upsert=True)
         #except:
         #    j.pop("_id",None)
         #    x = db.files.update({'name':j['name'],'project':j['project'],'user':j['user']},j)
-    
+        
     if method == "DELETE":
         x = db.files.remove({'name':j['name'],'project':j['project'],'user':j['user']})
 
@@ -178,7 +220,13 @@ def file(id=None):
 @app.route("/projects/<user>", methods=['GET','POST','DELETE','PUT'])
 def projects(user = None):
     projects = [x for x in db.projects.find({'user':user})]
-    print "Projects",projects
+    return json.dumps(projects)
+
+@app.route("/projects-share/<user>", methods=['GET','POST','DELETE','PUT'])
+def projects_share(user = None):
+    projects = [x for x in db.projects.find({'user':user})]
+    print [x for x in db.projects.find({}) if user in x['shared']]
+    projects.extend([x for x in db.projects.find({}) if user in x['shared']])
     return json.dumps(projects)
 
 @app.route("/project", methods=['GET','POST','DELETE','PUT'])
@@ -193,9 +241,12 @@ def project(id = None):
             return "Failure"
     elif method == "POST" or method == "PUT":
         j = request.get_json()
-        print j
+        #print j
         if id == None:
             id = j['user']+j['name']
+        if 'shared' not in j:
+            j['shared'] = []
+            
         j['_id']=id
         try:
             j['user'] = session['username']
@@ -204,7 +255,7 @@ def project(id = None):
 
         if db.projects.find_one({'name':j['name'],'user':j['user']}) == None:
             try:
-                x = db.projects.update({'name':j['name']},j,upsert=True)
+                x = db.projects.update({'name':j['name']},{"$set":j},upsert=True)
             except:
                 j.pop("_id",None)
                 x = db.projects.update({'name':j['name']},j)
@@ -219,6 +270,6 @@ def project(id = None):
 if __name__ == "__main__":
     app.secret_key = 'Hola'
     app.debug = True
-    print [x for x in db.files.find()]
+    #print [x for x in db.files.find()]
     #app.run()
     app.run(host="0.0.0.0",port=5678)
