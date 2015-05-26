@@ -66,7 +66,7 @@ def newfile(project = None):
             flash("Please input a new file name")
             return redirect("")
         elif db.files.find_one({'user':user,'project':project,'name':filename}) == None:
-            db.files.insert({'_id':filename,'content':"",'name':filename,'project':project,'user':user})
+            db.files.insert({'_id':user+'|'+project+'|'+filename,'content':"",'name':filename,'project':project,'user':user})
             return redirect("/editor/"+project+"/"+filename)
         else:
             flash("Filename already taken")
@@ -161,7 +161,7 @@ def file(id=None):
     elif method == "POST" or method == "PUT":
         j = request.get_json()
         if id == None:
-            id =j['name']
+            id =j['user']+"|"+j['project']+"|"+j['name']
 
         j['_id']=id
         #try:
@@ -195,7 +195,7 @@ def project(id = None):
         j = request.get_json()
         print j
         if id == None:
-            id = j['name']
+            id = j['user']+j['name']
         j['_id']=id
         try:
             j['user'] = session['username']
@@ -221,4 +221,4 @@ if __name__ == "__main__":
     app.debug = True
     print [x for x in db.files.find()]
     #app.run()
-    #app.run(host="0.0.0.0",port=5678)
+    app.run(host="0.0.0.0",port=5678)

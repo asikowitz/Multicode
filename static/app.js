@@ -2,6 +2,7 @@ console.log("HELLO");
 
 var app = new Marionette.Application();
 var refresh_var;
+var valid = false;
 
 var refresh = function() {
     app.cur.fetch({data:app.cur.toJSON(),processData:true});
@@ -16,6 +17,7 @@ app.addRegions({
 app.main.on("show", function() {
     app.editor = CodeMirror.fromTextArea(document.getElementById("textarea"),{mode:"htmlmixed"});
     app.editor.getDoc().setValue(app.cur.get("content"));
+    valid = true;
 });
 
 app.on("start",function() {
@@ -38,7 +40,7 @@ app.on("start",function() {
 			   app.main.show(app.fv);
 			   app.first.show(app.cv);
 			   app.second.show(app.pv);
-			   refresh_var = setInterval(refresh, 100);
+			   var refresh_var = setInterval(refresh, 100);
 		       }});
     }
     //If there is no filename, need to fetch collection before getting file
@@ -53,12 +55,14 @@ app.File = Backbone.Model.extend({
 	that = this;
 	this.on({
 	    "change":function() {
-		//$("#txt-box").val(that.get("content"));
-		var cursor = app.editor.getCursor();
-		app.editor.setValue(that.get("content"));
-		app.editor.setCursor(cursor);
-		app.pv.model.set({content:that.get("content")});
-		app.pv.render();
+		if (valid) {
+		    //$("#txt-box").val(that.get("content"));
+		    var cursor = app.editor.getCursor();
+		    app.editor.setValue(that.get("content"));
+		    app.editor.setCursor(cursor);
+		    app.pv.model.set({content:that.get("content")});
+		    app.pv.render();
+		}
 	    }
 	})
     }
