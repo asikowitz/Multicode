@@ -70,7 +70,6 @@ $("#new").click(function() {
 	    }
 	}});
     });
-});
-    
+});    
 
 app.start();

@@ -47,6 +47,7 @@ def sharing(project = None): #Only creator can change sharing
             return redirect("/editor/"+user+"/"+project)
         elif button == "submit":
             db.projects.update({'name':project,'user':user},{"$set":{'shared':shared}}) #upsert=False
+            db.files.update({'project':project,'user':user},{"$set":{'shared':shared}})
             return redirect("/editor/"+user+"/"+project)
         else:
             return redirect("/") #If someone names username button
@@ -272,4 +273,4 @@ if __name__ == "__main__":
     app.debug = True
     #print [x for x in db.files.find()]
     #app.run()
-    app.run(host="0.0.0.0",port=5678)
+    app.run(host="0.0.0.0",port=5000)

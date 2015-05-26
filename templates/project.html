@@ -12,15 +12,28 @@
   <div id="content" height="98%"><%= content %></div>
 </script>
 
-<!--div class="pure-menu">
+<!--div class="pure-menu"><a href="project.html" id="" title="project">project</a>
   <span class="pure-menu-heading">MENU</span>
   <ul class="pure-menu-list">
     <li class="pure-menu-item"><a href="/p-->
+<style>
+.custom-restricted-width {
+    /* To limit the menu width to the content of the menu: */
+    display: inline-block;
+    /* Or set the width explicitly: */
+    /* width: 10em; */
+}
+</style>
 
 <div class="pure-g">
-  <div class="pure-u-1-2" style="padding-left:50px;padding-right:10px;">
+	<div class="pure-u-1-12">
+		<div class="pure-menu custom-restricted-width">
+		    <span class="pure-menu-heading">Files</span>
+		</div>
+	    <div id="first"></div>
+	</div>
+  <div class="pure-u-5-12" style="padding-left:50px;padding-right:10px;">
     <h1 id="top"></h1>
-    <div id="first"></div>
     <div id="main"></div>
     <button id="sharing" class="pure-button">Sharing</button>
   </div>

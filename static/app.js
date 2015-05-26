@@ -36,7 +36,7 @@ app.on("start",function() {
 	app.cur = new app.File({name:filename,user:p_user,project:project});
 	app.cur.fetch({data:app.cur.toJSON(),processData:true,
 		       error:function(d) {
-			   console.log("ERROR",d)
+			   	console.log("ERROR",d)
 		       },
 		       success:function(d) { //Stuff can only run once fetch has happened
 			   console.log(app.cur);
@@ -114,12 +114,20 @@ app.Collection = Backbone.Collection.extend({
 app.FV = Marionette.ItemView.extend({
     template : "<script type='text/template'><%- name %></script>", //"#file-template",
     model : app.File,
-    tagName : "li"
+    tagName : "li",
+	className: "pure-menu-link",
+	id: 'file_click',
+	events: {
+		'click': function(e){
+			console.log('lg');
+		}
+	}
 });
 
 app.CollectionView = Marionette.CollectionView.extend({
     childView : app.FV,
-    tagName : "ul"
+    tagName : "ul",
+	className: "pure-menu-item"
 });
 
 app.Page = Backbone.Model.extend({});
