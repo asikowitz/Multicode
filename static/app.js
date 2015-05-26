@@ -52,15 +52,14 @@ app.File = Backbone.Model.extend({
     idAttribute:'_id',
     id:'_id',
     initialize : function() {
-	that = this;
 	this.on({
 	    "change":function() {
 		if (valid) {
 		    //$("#txt-box").val(that.get("content"));
 		    var cursor = app.editor.getCursor();
-		    app.editor.setValue(that.get("content"));
+		    app.editor.setValue(this.get("content"));
 		    app.editor.setCursor(cursor);
-		    app.pv.model.set({content:that.get("content")});
+		    app.pv.model.set({content:this.get("content")});
 		    app.pv.render();
 		}
 	    }
