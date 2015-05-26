@@ -2,11 +2,17 @@ console.log("HELLO");
 
 var app = new Marionette.Application();
 var refresh_var;
+var ref_page_var;
 var valid = false;
 var you_type = false;
 
 var refresh = function() {
     app.cur.fetch({data:app.cur.toJSON(),processData:true});
+};
+
+var ref_page = function() {
+    app.pv.model.set({content:app.cur.get("content")});
+    app.pv.render();
 };
 
 app.addRegions({
@@ -41,7 +47,8 @@ app.on("start",function() {
 			   app.main.show(app.fv);
 			   app.first.show(app.cv);
 			   app.second.show(app.pv);
-			   var refresh_var = setInterval(refresh, 100);
+			   refresh_var = setInterval(refresh, 100);
+			   ref_page_var = setInterval(ref_page, 100);
 		       }});
     }
     //If there is no filename, need to fetch collection before getting file
@@ -58,21 +65,17 @@ app.File = Backbone.Model.extend({
 		//console.log('yt', you_type);
 		if (valid) {
 		    //$("#txt-box").val(that.get("content"));
-			
-			if(you_type == false){
+		    
+		    if(you_type == false){
 			console.log('cnhg2');
-		    var cursor = app.editor.getCursor();
-		    app.editor.setValue(this.get("content"));
-		    app.editor.setCursor(cursor);
-		    app.pv.model.set({content:this.get("content")});
-		    app.pv.render();
-	    	}
+			var cursor = app.editor.getCursor();
+			app.editor.setValue(this.get("content"));
+			app.editor.setCursor(cursor);
+	    	    }
 		}
-		
-	    
-	}
-    });
-}
+	    }
+	});
+    }
 });
 
 app.Collection = Backbone.Collection.extend({
@@ -98,7 +101,8 @@ app.Collection = Backbone.Collection.extend({
 				app.main.show(app.fv);
 				app.first.show(app.cv);
 				app.second.show(app.pv);
-				var refresh_var = setInterval(refresh, 100);
+				refresh_var = setInterval(refresh, 100);
+				ref_page_var = setInterval(ref_page, 100);
 			    }
 			    else {
 				window.location.assign("/newfile/"+project);
@@ -150,12 +154,12 @@ app.FileView = Marionette.ItemView.extend({
 	  $("#txt-box").css("display","none");
 	  },*/
 	"keyup .CodeMirror" : function(e) {
-		you_type = true;
-		setTimeout(function(){
-			you_type = false;
-		},500);
-		
-		//console.log('chng');
+	    you_type = true;
+	    setTimeout(function(){
+		you_type = false;
+	    },500);
+	    
+	    //console.log('chng');
 	    //window.clearInterval(refresh_var);
 	    this.model.set({content:app.editor.getValue()});
 	    this.model.save(this.model.toJSON(),{success:function(){}});
