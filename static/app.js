@@ -3,6 +3,7 @@ console.log("HELLO");
 var app = new Marionette.Application();
 var refresh_var;
 var valid = false;
+var you_type = false;
 
 var refresh = function() {
     app.cur.fetch({data:app.cur.toJSON(),processData:true});
@@ -54,17 +55,24 @@ app.File = Backbone.Model.extend({
     initialize : function() {
 	this.on({
 	    "change":function() {
+		//console.log('yt', you_type);
 		if (valid) {
 		    //$("#txt-box").val(that.get("content"));
+			
+			if(you_type == false){
+			console.log('cnhg2');
 		    var cursor = app.editor.getCursor();
 		    app.editor.setValue(this.get("content"));
 		    app.editor.setCursor(cursor);
 		    app.pv.model.set({content:this.get("content")});
 		    app.pv.render();
+	    	}
 		}
-	    }
-	})
-    }
+		
+	    
+	}
+    });
+}
 });
 
 app.Collection = Backbone.Collection.extend({
@@ -142,6 +150,12 @@ app.FileView = Marionette.ItemView.extend({
 	  $("#txt-box").css("display","none");
 	  },*/
 	"keyup .CodeMirror" : function(e) {
+		you_type = true;
+		setTimeout(function(){
+			you_type = false;
+		},500);
+		
+		//console.log('chng');
 	    //window.clearInterval(refresh_var);
 	    this.model.set({content:app.editor.getValue()});
 	    this.model.save(this.model.toJSON(),{success:function(){}});
