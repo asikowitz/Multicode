@@ -119,27 +119,13 @@ app.FV = Marionette.ItemView.extend({
 	id: 'file_click',
 	events: {
 		'click': function(e){
-			console.log(e);
-			/*
-			app.cur = new app.File({name:filename,user:p_user,project:project});
-			app.cur.fetch({data:app.cur.toJSON(),processData:true,
-				       error:function(d) {
-					   	console.log("ERROR",d)
-				       },
-				       success:function(d) { //Stuff can only run once fetch has happened
-					   console.log(app.cur);
-					   app.fv = new app.FileView({model:app.cur});
-					   page = new app.Page({content:app.fv.model.get("content")});
-					   app.pv = new app.PageView({model:page});
-					   app.cv = new app.CollectionView({collection:app.c})
-					   app.main.show(app.fv);
-					   app.first.show(app.cv);
-					   app.second.show(app.pv);
-					   refresh_var = setInterval(refresh, 100);
-					   ref_page_var = setInterval(ref_page, 100);
-				       }});
-		    }
-			*/
+			console.log(this.model);
+		
+			app.cur = this.model;
+			app.fv = new app.FileView({model:app.cur});
+			app.pv = new app.PageView({model:new app.Page({content:app.fv.model.get("content")})});
+			app.fv.render();
+			app.pv.render();
 		}
 	}
 });
@@ -201,5 +187,6 @@ app.FileView = Marionette.ItemView.extend({
 });
 
 $("#sharing").click(function(){window.location = "/sharing/"+project});
+$("#add_file").click(function(){window.location = "/newfile/"+project});
 
 app.start();
