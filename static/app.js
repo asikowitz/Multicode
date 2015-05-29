@@ -123,9 +123,12 @@ app.FV = Marionette.ItemView.extend({
 		
 			app.cur = this.model;
 			app.fv = new app.FileView({model:app.cur});
-			app.pv = new app.PageView({model:new app.Page({content:app.fv.model.get("content")})});
-			app.fv.render();
-			app.pv.render();
+			app.pv.model.content = app.fv.model.get("content");
+			//app.fv.render();
+			//app.pv.render();
+			app.main.show(app.fv);
+			//app.first.show(app.cv);
+			app.second.show(app.pv);
 		}
 	}
 });
