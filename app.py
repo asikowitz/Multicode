@@ -9,7 +9,7 @@ app.secret_key = 'Hola'
 app.debug = True
 mongo = MongoClient()
 db = mongo['filesdb']
-#print [x for x in db.files.find()]
+print [x for x in db.files.find()]
 
 def authenticate(func):
     @wraps(func)
@@ -65,16 +65,19 @@ def editor(project = None, name = None, p_user=None):
     user = session['username']
     if db.files.find_one({'user':p_user,'project':project}) == None:
         flash("Create your first file")
-        return redirect("/newfile/"+project)
+        return redirect("/newfile/"+user+"/"+project)
 
     return render_template("project.html",project=project,name=name,p_user=p_user,username=session['username'])
 
 @authenticate
 @app.route("/newfile/", methods=['GET', 'POST'])
-@app.route("/newfile/<project>", methods=['GET', 'POST'])
-def newfile(project = None):
+@app.route("/newfile/<p_user>/<project>", methods=['GET', 'POST'])
+def newfile(project = None, p_user = None):
     if project == None:
         flash("Please select a project")
+        return redirect("/")
+    elif p_user == None:
+        flash("Bad URL")
         return redirect("/")
     if request.method == "GET":
         return render_template("newfile.html")
@@ -87,13 +90,13 @@ def newfile(project = None):
             if db.files.find_one({'user':user,'project':project}) == None:
                 return redirect("/")
             else:
-                return redirect("/editor/"+project+"/"+filename)
+                return redirect("/editor/"+user+"/"+project+"/"+filename)
 
         if not filename:
             flash("Please input a new file name")
             return redirect("")
         elif db.files.find_one({'user':user,'project':project,'name':filename}) == None:
-            project_var = db.projects.find_one({'name':project,'user':user})
+            project_var = db.projects.find_one({'name':project,'user':p_user})
             shared = project_var['shared']
             p_user = project_var['user']
             db.files.insert({'_id':p_user+':'+project+':'+filename,'content':"",'shared':shared,'name':filename,'project':project,'user':p_user})
@@ -181,7 +184,7 @@ def files_share():
         project = request.args.get('project')
         files = [x for x in db.files.find({'project':project,'user':user})]
         print user,project,files
-        files.extend([x for x in db.files.find({}) if user in x['shared']])
+        files.extend([x for x in db.files.find({'project':project}) if user in x['shared']])
         return json.dumps(files)
     except:
         return "Failure"
@@ -207,11 +210,11 @@ def file(id=None):
             j['shared'] = []
 
         j['_id']=id
-        #try:
-        x = db.files.update({'name':j['name'],'project':j['project'],'user':j['user']},{"$set":j},upsert=True)
-        #except:
-        #    j.pop("_id",None)
-        #    x = db.files.update({'name':j['name'],'project':j['project'],'user':j['user']},j)
+        try:
+            x = db.files.update({'name':j['name'],'project':j['project'],'user':j['user']},{"$set":j},upsert=True)
+        except:
+            j.pop("_id",None)
+            x = db.files.update({'name':j['name'],'project':j['project'],'user':j['user']},j)
         
     if method == "DELETE":
         x = db.files.remove({'name':j['name'],'project':j['project'],'user':j['user']})
@@ -256,10 +259,11 @@ def project(id = None):
 
         if db.projects.find_one({'name':j['name'],'user':j['user']}) == None:
             try:
-                x = db.projects.update({'name':j['name']},{"$set":j},upsert=True)
+                print j,db
+                x = db.projects.update({"name":j["name"]},{"$set":j},upsert=True)
             except:
-                j.pop("_id",None)
-                x = db.projects.update({'name':j['name']},j)
+                print j,db
+                x = db.projects.insert(j)
         else:
             return json.dumps({"result":"This project name already exists"})
             

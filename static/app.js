@@ -29,7 +29,7 @@ app.main.on("show", function() {
 
 app.on("start",function() {
     console.log("Started");
-    console.log(filename,username);
+    console.log(filename,username,project);
     app.c = new app.Collection([],{user:p_user,project:project});
     if (filename != "None" && username != "None" && project != "None") {
 	console.log("FETCHING");
@@ -190,6 +190,6 @@ app.FileView = Marionette.ItemView.extend({
 });
 
 $("#sharing").click(function(){window.location = "/sharing/"+project});
-$("#add_file").click(function(){window.location = "/newfile/"+project});
+$("#add_file").click(function(){window.location = "/newfile/"+p_user+"/"+project});
 
 app.start();
